@@ -42,6 +42,59 @@ class SX_SMTP_settings
         );
     }
 
+    public function sx_smtp_test_mail( $to_email, $subject, $message ) {
+        $settings["enabled"]  = get_option( $this->args["enabled"] );
+        $settings["host"]     = get_option( $this->args["host"] );
+        $settings["port"]     = get_option( $this->args["port"] );
+        $settings["username"] = get_option( $this->args["username"] );
+        $settings["password"] = get_option( $this->args["password"] );
+
+        require_once( ABSPATH . WPINC . '/class-phpmailer.php' );
+        $mail = new PHPMailer();
+
+        $mail->CharSet = get_bloginfo( 'charset' );
+        $mail->IsSMTP();
+        // send plain text test email
+        $mail->ContentType = 'text/plain';
+        $mail->IsHTML( false );
+        $mail->SMTPAuth	  = true;
+        $mail->SMTPSecure = 'tls';
+        $mail->Username	  = $settings[ 'username' ];
+        $mail->Password	  = $settings['password'];
+
+        /* Set the other options */
+//        $mail->SetFrom( 'test@test.net', 'test' );
+        $mail->Host	   = $settings[ 'host' ];
+        $mail->Port	   = $settings[ 'port' ];
+        $mail->Subject = $subject;
+        $mail->Body    = $message;
+        $mail->AddAddress( $to_email );
+        global $debugMSG;
+        $debugMSG		 = '';
+        $mail->Debugoutput	 = function( $str ) {
+            global $debugMSG;
+            $debugMSG .= $str;
+        };
+        $mail->SMTPDebug = 2;
+
+        var_dump( $mail );
+        /* Send mail and return result */
+        if ( ! $mail->Send() ) $errors = $mail->ErrorInfo;
+
+        $mail->ClearAddresses();
+        $mail->ClearAllRecipients();
+
+        echo '<div class="swpsmtp-yellow-box"><h3>Debug Info</h3>';
+        echo '<textarea rows="20" style="width: 100%;">' . $debugMSG . '</textarea>';
+        echo '</div>';
+
+        if ( ! empty( $errors ) ) {
+            return $errors;
+        } else {
+            return 'Test mail was sent';
+        }
+    }
+
     /**
      * Add options to settings page
      */
@@ -56,6 +109,31 @@ class SX_SMTP_settings
         $username = get_option( $this->args["username"] );
         $password = get_option( $this->args["password"] );
         $enabled  = ( get_option( $this->args["enabled"] ) ) ? " checked=checked " : "";
+
+        /* Send test letter */
+        $sx_smtp_send_to = '';
+        if ( isset( $_POST[ 'sx_smtp_test_submit' ] ) ) {
+            if (isset($_POST['sx_smtp_send_to'])) {
+                $to_email = sanitize_text_field($_POST['sx_smtp_send_to']);
+                if (is_email($to_email)) {
+                    $sx_smtp_send_to = $to_email;
+                } else {
+                    $error = __("Please enter a valid email address in the recipient email field.", 'skynix');
+                }
+            }
+            $sx_smtp_subject = isset($_POST['sx_smtp_subject']) ? sanitize_text_field($_POST['sx_smtp_subject']) : '';
+            $sx_smtp_message = isset($_POST['sx_smtp_message']) ? sanitize_textarea_field($_POST['sx_smtp_message']) : '';
+
+            //Save the test mail details so it doesn't need to be filled in everytime.
+            $smtp_test_mail['sx_smtp_send_to'] = $sx_smtp_send_to;
+            $smtp_test_mail['sx_smtp_subject'] = $sx_smtp_subject;
+            $smtp_test_mail['sx_smtp_message'] = $sx_smtp_message;
+
+            if (!empty($sx_smtp_send_to)) {
+                $result = $this->sx_smtp_test_mail($sx_smtp_send_to, $sx_smtp_subject, $sx_smtp_message);
+                var_dump($result);
+            }
+        }
 
         ?>
         <div class="wrap">
@@ -114,13 +192,49 @@ class SX_SMTP_settings
                 ?>
             </form>
         </div>
+
+        <div class="sx_smtp-tab-container" data-tab-name="testemail">
+            <h3 class="hndle"><label for="title"><?php _e( 'Test Email', 'skynix' ); ?></label></h3>
+            <div class="inside">
+                 <form id="sx_smtp_settings_form" method="post" action="">
+                    <table class="form-table">
+                        <tr valign="top">
+                            <th scope="row"><?php _e( "To", 'skynix' ); ?>:</th>
+                            <td>
+                                <input id="sx_smtp_send_to" type="text" class="ignore-change" name="sx_smtp_send_to" value="" /><br />
+                                <p class="description"><?php _e( "Enter the recipient's email address", 'skynix' ); ?></p>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row"><?php _e( "Subject", 'skynix' ); ?>:</th>
+                            <td>
+                                <input id="sx_smtp_subject" type="text" class="ignore-change" name="sx_smtp_subject" value="" /><br />
+                                <p class="description"><?php _e( "Enter a subject for your message", 'skynix' ); ?></p>
+                            </td>
+                        </tr>
+                        <tr valign="top">
+                            <th scope="row"><?php _e( "Message", 'skynix' ); ?>:</th>
+                            <td>
+                                <textarea name="sx_smtp_message" id="sx_smtp_message" rows="5"></textarea><br />
+                                <p class="description"><?php _e( "Write your email message", 'skynix' ); ?></p>
+                            </td>
+                        </tr>
+                    </table>
+                    <p class="submit">
+                        <input type="submit" id="settings-form-submit" class="button-primary" value="<?php _e( 'Send Test Email', 'skynix' ) ?>" />
+                        <input type="hidden" name="sx_smtp_test_submit" value="submit" />
+                    </p>
+                </form>
+            </div><!-- end of inside -->
+        </div>
+
         <script type="text/javascript">
             function enableCheck(){
                 host     = jQuery('#<?php echo $this->args["host"]; ?>').val();
                 port     = jQuery('#<?php echo $this->args["port"]; ?>').val();
                 username = jQuery('#<?php echo $this->args["username"]; ?>').val();
                 password = jQuery('#<?php echo $this->args["password"]; ?>').val();
-                console.log(host + '__' + port + '__' + username + '__' + password);
+
                 if (
                     typeof host !== 'undefined' && typeof port !== 'undefined' &&
                     typeof username !== 'undefined' && typeof password !== 'undefined' &&
