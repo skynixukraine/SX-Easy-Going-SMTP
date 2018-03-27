@@ -120,7 +120,7 @@ class SX_SMTP_settings
                 port     = jQuery('#<?php echo $this->args["port"]; ?>').val();
                 username = jQuery('#<?php echo $this->args["username"]; ?>').val();
                 password = jQuery('#<?php echo $this->args["password"]; ?>').val();
-                console.log(host + '__' + port + '__' + username + '__' + password);
+
                 if (
                     typeof host !== 'undefined' && typeof port !== 'undefined' &&
                     typeof username !== 'undefined' && typeof password !== 'undefined' &&
