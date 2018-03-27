@@ -55,8 +55,7 @@ class SX_SMTP_settings
         $port     = get_option( $this->args["port"] );
         $username = get_option( $this->args["username"] );
         $password = get_option( $this->args["password"] );
-        $enabled  = get_option( $this->args["enabled"] );
-        $enabled  = ( $enabled ) ? " checked=checked " : "";
+        $enabled  = ( get_option( $this->args["enabled"] ) ) ? " checked=checked " : "";
 
         ?>
         <div class="wrap">
@@ -67,7 +66,7 @@ class SX_SMTP_settings
             <form action="options.php" method="post">
                 <table>
                     <tr>
-                        <td><label for="<?php echo $this->args["host"]; ?>" ><?php _e( 'Enter Hostname', $this->args["textdomain"] ); ?>: </label></td>
+                        <td><label for="<?php echo $this->args["host"]; ?>" ><?php _e( 'Hostname', $this->args["textdomain"] ); ?>*: </label></td>
                         <td><input type="text"
                                    class="sx-smtp-input"
                                    id="<?php echo $this->args["host"]; ?>"
@@ -75,7 +74,7 @@ class SX_SMTP_settings
                                    value="<?php echo $host; ?>"></td>
                     </tr>
                     <tr>
-                        <td><label for="<?php echo $this->args["port"]; ?>" ><?php _e( 'Enter Port', $this->args["textdomain"] ); ?>: </label></td>
+                        <td><label for="<?php echo $this->args["port"]; ?>" ><?php _e( 'Port', $this->args["textdomain"] ); ?>*: </label></td>
                         <td><input type="text"
                                    class="sx-smtp-input"
                                    id="<?php echo $this->args["port"]; ?>"
@@ -83,7 +82,7 @@ class SX_SMTP_settings
                                    value="<?php echo $port; ?>"></td>
                     </tr>
                     <tr>
-                        <td><label for="<?php echo $this->args["username"]; ?>" ><?php _e( 'Enter Username', $this->args["textdomain"] ); ?>: </label></td>
+                        <td><label for="<?php echo $this->args["username"]; ?>" ><?php _e( 'Username', $this->args["textdomain"] ); ?>*: </label></td>
                         <td><input type="text"
                                    class="sx-smtp-input"
                                    id="<?php echo $this->args["username"]; ?>"
@@ -91,7 +90,7 @@ class SX_SMTP_settings
                                    value="<?php echo $username; ?>"></td>
                     </tr>
                     <tr>
-                        <td><label for="<?php echo $this->args["password"]; ?>" ><?php _e( 'Enter Password', $this->args["textdomain"] ); ?>: </label></td>
+                        <td><label for="<?php echo $this->args["password"]; ?>" ><?php _e( 'Password', $this->args["textdomain"] ); ?>*: </label></td>
                         <td><input type="password"
                                    class="sx-smtp-password"
                                    id="<?php echo $this->args["password"]; ?>"
@@ -101,9 +100,11 @@ class SX_SMTP_settings
                     <tr>
                         <td><label for="<?php echo $this->args["enabled"]; ?>" ><?php _e( 'Check to enable plugin', $this->args["textdomain"] ); ?>: </label></td>
                         <td><input type="checkbox" class="sx-smtp-checkbox" id="<?php echo $this->args["enabled"]; ?>"
-                                   name="<?php echo $this->args["enabled"]; ?>" <?php echo $enabled; ?>></td>
+                                   name="<?php echo $this->args["enabled"]; ?>" <?php echo $enabled; ?> disabled></td>
                     </tr>
                 </table>
+                <p><?php echo __( 'All fields must be filled to enable this plugin', $this->args["textdomain"] ); ?></p>
+
                 <?php
                 // output security fields for the registered setting "sxpg"
                 settings_fields( 'sx-smtp-settings' );
@@ -113,6 +114,28 @@ class SX_SMTP_settings
                 ?>
             </form>
         </div>
+        <script type="text/javascript">
+            function enableCheck(){
+                host     = jQuery('#<?php echo $this->args["host"]; ?>').val();
+                port     = jQuery('#<?php echo $this->args["port"]; ?>').val();
+                username = jQuery('#<?php echo $this->args["username"]; ?>').val();
+                password = jQuery('#<?php echo $this->args["password"]; ?>').val();
+                console.log(host + '__' + port + '__' + username + '__' + password);
+                if (
+                    typeof host !== 'undefined' && typeof port !== 'undefined' &&
+                    typeof username !== 'undefined' && typeof password !== 'undefined' &&
+                    host.length > 0 && port.length > 0 && username.length > 0 && password.length > 0
+                ) {
+                    jQuery('#<?php echo $this->args["enabled"]; ?>').removeAttr("disabled");
+                } else {
+                    jQuery('#<?php echo $this->args["enabled"]; ?>').attr("disabled", true);
+                }
+            }
+            jQuery(document).ready(function(){
+                enableCheck();
+                jQuery(document).on('keyup', 'input[type=text]', enableCheck);
+            });
+        </script>
         <?php
     }
 
