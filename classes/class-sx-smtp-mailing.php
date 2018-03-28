@@ -64,7 +64,9 @@ class SX_SMTP_mailing
             return;
         }
 
+        $phpmailer->IsSMTP();
         $phpmailer->SetFrom( $phpmailer->From, $phpmailer->FromName );
+
         $phpmailer->Host       = $settings['host'];
         $phpmailer->Port       = $settings['port'];
         $phpmailer->SMTPAuth   = true;
