@@ -35,7 +35,7 @@ class SX_SMTP_settings
     public function sx_smtp_add_settings_page(){
         add_options_page(
             __( "SX Easy-going SMTP settings", $this->args["textdomain"] ),
-            __( "SX Easy-going SMTP settings", $this->args["textdomain"] ),
+            __( "SX Easy-going SMTP", $this->args["textdomain"] ),
             "manage_options",
             "sx-smtp-settings.php",
             array( $this, 'sx_smtp_settings_page_content' )
@@ -58,12 +58,13 @@ class SX_SMTP_settings
         $enabled  = ( get_option( $this->args["enabled"] ) ) ? " checked=checked " : "";
 
         ?>
-        <div class="wrap">
+
+        <div class="sx_smtp-tab-container wrap" data-tab-name="settings">
             <h1><?php echo esc_html( get_admin_page_title(), $this->args["textdomain"] ); ?></h1>
             <hr>
             <p><?php echo __( 'Feel free to', $this->args["textdomain"] ); ?> <a href="https://skynix.company/wordpress-plugin-development"><?php echo __( 'contact us', $this->args["textdomain"] ); ?></a> <?php echo __( 'if you need any kind of support', $this->args["textdomain"] ); ?></p>
             <hr>
-            <form action="options.php" method="post">
+            <form id="settings-form" action="options.php" method="post">
                 <table>
                     <tr>
                         <td><label for="<?php echo $this->args["host"]; ?>" ><?php _e( 'Hostname', $this->args["textdomain"] ); ?>*: </label></td>
@@ -114,6 +115,7 @@ class SX_SMTP_settings
                 ?>
             </form>
         </div>
+
         <script type="text/javascript">
             function enableCheck(){
                 host     = jQuery('#<?php echo $this->args["host"]; ?>').val();
@@ -133,7 +135,7 @@ class SX_SMTP_settings
             }
             jQuery(document).ready(function(){
                 enableCheck();
-                jQuery(document).on('keyup', 'input[type=text]', enableCheck);
+                jQuery(document).on('keyup', '#settings-form input[type=text]', enableCheck);
             });
         </script>
         <?php
