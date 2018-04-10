@@ -28,7 +28,7 @@ class SX_SMTP_mailing
             $settings = $this->sx_smtp_get_settings();
         }
 
-        if ( $settings["enabled"] && !empty( $settings["host"] ) && !empty( $settings["port"] ) &&
+        if ( !empty( $settings["from_email"] ) && !empty( $settings["host"] ) && !empty( $settings["port"] ) &&
             !empty( $settings["username"] ) && !empty( $settings["password"] ) )
         {
             $response = true;
@@ -43,11 +43,11 @@ class SX_SMTP_mailing
      * @return array
      */
     public function sx_smtp_get_settings(){
-        $settings["enabled"]  = get_option( $this->args["enabled"] );
-        $settings["host"]     = get_option( $this->args["host"] );
-        $settings["port"]     = get_option( $this->args["port"] );
-        $settings["username"] = get_option( $this->args["username"] );
-        $settings["password"] = get_option( $this->args["password"] );
+        $settings["from_email"] = get_option( $this->args["from_email"] );
+        $settings["host"]       = get_option( $this->args["host"] );
+        $settings["port"]       = get_option( $this->args["port"] );
+        $settings["username"]   = get_option( $this->args["username"] );
+        $settings["password"]   = get_option( $this->args["password"] );
 
         return $settings;
     }
@@ -65,7 +65,8 @@ class SX_SMTP_mailing
         }
 
         $phpmailer->IsSMTP();
-        $phpmailer->SetFrom( $phpmailer->From, $phpmailer->FromName );
+        $phpmailer->SetFrom( $settings["from_email"], $phpmailer->FromName );
+        $phpmailer->isHTML( true );
 
         $phpmailer->Host       = $settings['host'];
         $phpmailer->Port       = $settings['port'];
