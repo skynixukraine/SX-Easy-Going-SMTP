@@ -6,16 +6,33 @@
 class SX_SMTP_settings
 {
     public $args;
+    public $menu_slug = 'sx-smtp-settings.php';
 
     public function __construct( $args ) {
         $this->args = $args;
     }
 
     public function init() {
+        $plugin = basename( dirname( __FILE__ , 2 ) ) . '/init.php';
         // Register settings options
         add_action( 'admin_init', array( $this, 'sx_smtp_settings_fields' ) );
         // Create settings subpage
         add_action( 'admin_menu', array( $this, 'sx_smtp_add_settings_page' ) );
+        // Add link to plugin settings page
+        add_filter( "plugin_action_links_$plugin", array( $this, 'sx_smtp_add_settings_link' ), 99, 1 );
+    }
+
+    /**
+     * Add "Settings" link to plugin description on plugins page
+     *
+     * @param $links
+     * @return mixed
+     */
+    public function sx_smtp_add_settings_link( $links ) {
+        $settings_link = '<a href="options-general.php?page=' . $this->menu_slug . '">' . __( 'Settings' ) . '</a>';
+        array_unshift( $links, $settings_link );
+
+        return $links;
     }
 
     /**
@@ -26,7 +43,7 @@ class SX_SMTP_settings
         register_setting( 'sx-smtp-settings', $this->args["port"] );
         register_setting( 'sx-smtp-settings', $this->args["username"] );
         register_setting( 'sx-smtp-settings', $this->args["password"] );
-        register_setting( 'sx-smtp-settings', $this->args["enabled"] );
+        register_setting( 'sx-smtp-settings', $this->args["from_email"] );
     }
 
     /**
@@ -37,7 +54,7 @@ class SX_SMTP_settings
             __( "SX Easy-going SMTP settings", $this->args["textdomain"] ),
             __( "SX Easy-going SMTP", $this->args["textdomain"] ),
             "manage_options",
-            "sx-smtp-settings.php",
+            $this->menu_slug,
             array( $this, 'sx_smtp_settings_page_content' )
         );
     }
@@ -51,11 +68,11 @@ class SX_SMTP_settings
             return;
         }
 
-        $host     = get_option( $this->args["host"] );
-        $port     = get_option( $this->args["port"] );
-        $username = get_option( $this->args["username"] );
-        $password = get_option( $this->args["password"] );
-        $enabled  = ( get_option( $this->args["enabled"] ) ) ? " checked=checked " : "";
+        $host       = get_option( $this->args["host"] );
+        $port       = get_option( $this->args["port"] );
+        $username   = get_option( $this->args["username"] );
+        $password   = get_option( $this->args["password"] );
+        $from_email = get_option( $this->args["from_email"] );
 
         ?>
 
@@ -66,6 +83,14 @@ class SX_SMTP_settings
             <hr>
             <form id="settings-form" action="options.php" method="post">
                 <table>
+                    <tr>
+                        <td><label for="<?php echo $this->args["from_email"]; ?>" ><?php _e( 'From e-mail', $this->args["textdomain"] ); ?>*: </label></td>
+                        <td><input type="text"
+                                   class="sx-smtp-input"
+                                   id="<?php echo $this->args["from_email"]; ?>"
+                                   name="<?php echo $this->args["from_email"]; ?>"
+                                   value="<?php echo $from_email; ?>"></td>
+                    </tr>
                     <tr>
                         <td><label for="<?php echo $this->args["host"]; ?>" ><?php _e( 'Hostname', $this->args["textdomain"] ); ?>*: </label></td>
                         <td><input type="text"
@@ -98,11 +123,6 @@ class SX_SMTP_settings
                                    name="<?php echo $this->args["password"]; ?>"
                                    value="<?php echo $password; ?>"></td>
                     </tr>
-                    <tr>
-                        <td><label for="<?php echo $this->args["enabled"]; ?>" ><?php _e( 'Check to enable plugin', $this->args["textdomain"] ); ?>: </label></td>
-                        <td><input type="checkbox" class="sx-smtp-checkbox" id="<?php echo $this->args["enabled"]; ?>"
-                                   name="<?php echo $this->args["enabled"]; ?>" <?php echo $enabled; ?> disabled></td>
-                    </tr>
                 </table>
                 <p><?php echo __( 'All fields must be filled to enable this plugin', $this->args["textdomain"] ); ?></p>
 
@@ -116,28 +136,6 @@ class SX_SMTP_settings
             </form>
         </div>
 
-        <script type="text/javascript">
-            function enableCheck(){
-                host     = jQuery('#<?php echo $this->args["host"]; ?>').val();
-                port     = jQuery('#<?php echo $this->args["port"]; ?>').val();
-                username = jQuery('#<?php echo $this->args["username"]; ?>').val();
-                password = jQuery('#<?php echo $this->args["password"]; ?>').val();
-
-                if (
-                    typeof host !== 'undefined' && typeof port !== 'undefined' &&
-                    typeof username !== 'undefined' && typeof password !== 'undefined' &&
-                    host.length > 0 && port.length > 0 && username.length > 0 && password.length > 0
-                ) {
-                    jQuery('#<?php echo $this->args["enabled"]; ?>').removeAttr("disabled");
-                } else {
-                    jQuery('#<?php echo $this->args["enabled"]; ?>').attr("disabled", true);
-                }
-            }
-            jQuery(document).ready(function(){
-                enableCheck();
-                jQuery(document).on('keyup', '#settings-form input[type=text]', enableCheck);
-            });
-        </script>
         <?php
     }
 
