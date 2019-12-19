@@ -1,7 +1,13 @@
-Skynix, SX Easy-going SMTP, 1.0.0 
-Description: SX Easy-going SMTP is FREE plugin for sending e-mail from a wordpress web-site.
+**Skynix LLC**, 
+
+**SX Easy-going SMTP**,
+
+**Version 1.1.0** 
+
+**Description:** SX Easy-going SMTP is FREE plugin for sending e-mail from a wordpress web-site.
 Allows easily set up e-mail sending on any wordpress site in minutes.
-License: GPL
+
+`License:` GPL
 
 Copyright 2018 Skynix ( email: apps@skynix.co )
     This program is free software; you can redistribute it and/or modify

@@ -1,5 +1,6 @@
 === SX Easy-going SMTP ===
 Contributors: skynix
+Donate link: https://skynix.co/
 Tags: email, e-mail, smtp, easy, wordpress, mailing, sx, skynix
 Requires at least: 4.6
 Tested up to: 4.9.4
@@ -45,10 +46,17 @@ page Settings -> SX Easy-going SMTP and enter given credentials like host, port,
 
 == Changelog ==
 
+= 1.1.0 =
+Stable Basic Version
+
 = 1.0.0 =
 Plugin uploaded.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+* Removed mime version to prevent double mime header error that happend in ccf plugin
+* Implemented FROM directive
 
 = 1.0.0 =
 First version of plugin
